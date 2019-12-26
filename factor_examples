@@ -1,0 +1,42 @@
+library(tidyverse)
+
+example <- data.frame(
+        sexo = c(rep('masc', 10), rep('fem', 10), rep(NA, 10)),
+        creat = c(rnorm(10, 1, 0.25), rnorm(10, 0.9, 0.2), rep(NA, 10))
+)
+
+str(example)
+is.na(example)
+levels(example$sexo)
+
+##It is dificult to replace not avaiable in factor
+
+example <- example %>% 
+  mutate(
+    sexo = fct_recode(sexo,
+                      'feminino' = 'fem',
+                      'masculino' = 'masc'),
+    sexo = fct_relevel(sexo, 'masculino', 'feminino')
+  )
+
+## Try to remove NA
+example <- example %>% 
+  mutate(
+    sexo = fct_recode(sexo,
+                      'feminino' = 'feminino',
+                      'masculino' = 'masculino',
+                      'indefinido' = NA) )
+## Correct form
+example <- example %>% 
+  mutate(
+    sexo = fct_explicit_na(sexo, na_level = 'indisponivel')
+  )
+
+
+#replave NA in creatinine to mean
+example$creat[is.na(example$creat)] <- mean(example$creat, na.rm = TRUE)
+
+
+##ggplot
+ggplot(example, aes(sexo, creat, fill = sexo))+
+  geom_boxplot()
